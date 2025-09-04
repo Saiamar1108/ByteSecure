@@ -1,10 +1,23 @@
+import os
 import json
 
+# Get current script directory
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Build path to JSON
+json_path = os.path.join(base_dir, "keywords.json")
+
 # Load phishing keywords from JSON file
-with open("keywords.json", "r") as f:
+with open(json_path, "r") as f:
     data = json.load(f)
 
-keywords = data["phishing_keywords"]
+# Handle both dictionary and list formats
+if isinstance(data, dict) and "phishing_keywords" in data:
+    keywords = data["phishing_keywords"]
+elif isinstance(data, list):
+    keywords = data
+else:
+    raise ValueError("Invalid JSON format for keywords.json")
 
 # Get user input (email or text message)
 message = input("Enter the email/text message: ").lower()
@@ -17,10 +30,3 @@ if found_keywords:
     print("Suspicious keywords found:", ", ".join(found_keywords))
 else:
     print("✅ Safe Message")
-# Save the result to a log file
-with open("detection_log.txt", "a") as log_file:   
-    if found_keywords:
-        log_file.write(f"Phishing Detected: {', '.join(found_keywords)} in message: {message}\n")
-    else:
-        log_file.write(f"Safe Message: {message}\n")
-        
